@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<!--
+  Launch file COMPLET – driver + contrôleur + évitement obstacles + RViz + rqt_plot
+  Bureau d'etude ENSEM – Février 2026
+
+  Usage :
+    roslaunch limo_autonomous autonomous.launch
+    roslaunch limo_autonomous autonomous.launch use_driver:=false   # si driver déjà lancé
+    roslaunch limo_autonomous autonomous.launch use_rviz:=false use_rqt:=false
+-->
+<launch>
+    <!-- ── Arguments globaux ─────────────────────────────────────────── -->
+    <arg name="use_driver"   default="true"  />
+    <arg name="use_rviz"     default="true"  />
+    <arg name="use_rqt"      default="true"  />
+
+    <!-- Paramètres robot -->
+    <arg name="wheelbase"          default="0.2"   />
+    <arg name="v_max"              default="0.5"   />
+    <arg name="gamma_max"          default="0.46"  />
+
+    <!-- Gains contrôleur -->
+    <arg name="k_rho"              default="1.0"   />
+    <arg name="k_alpha"            default="3.0"   />
+    <arg name="k_beta"             default="-0.5"  />
+
+    <!-- Seuils -->
+    <arg name="position_threshold" default="0.05"  />
+    <arg name="angle_threshold"    default="0.1"   />
+
+    <!-- Fréquence -->
+    <arg name="control_rate"       default="20"    />
+
+    <!-- Paramètres évitement obstacles -->
+    <arg name="stop_distance"      default="0.3"   />
+    <arg name="slow_distance"      default="0.6"   />
+    <arg name="fov_center_deg"     default="30"    />
+
+    <!-- ── Driver Limo (optionnel) ────────────────────────────────── -->
+    <group if="$(arg use_driver)">
+        <include file="$(find limo_base)/launch/limo_base.launch">
+            <arg name="pub_odom_tf" value="true" />
+        </include>
+    </group>
+    
+    <!-- ── TF statiques pour les capteurs ─────────────────────────── -->
+    <!-- laser_link -> base_link -->
+    <node pkg="tf" type="static_transform_publisher" name="base_to_laser"
+          args="0.1 0 0.1 0 0 0 base_link laser_link 100" />
+    
+    <!-- imu_link -> base_link -->
+    <node pkg="tf" type="static_transform_publisher" name="base_to_imu"
+          args="0 0 0.05 0 0 0 base_link imu_link 100" />
+    
+    <!-- camera_link -> base_link -->
+    <node pkg="tf" type="static_transform_publisher" name="base_to_camera"
+          args="0.15 0 0.1 0 0 0 base_link camera_link 100" />
+
+    <!-- ── Noeud Contrôleur ──────────────────────────────────────── -->
+    <node name="limo_controller" pkg="limo_autonomous"
+          type="controller_node.py" output="screen">
+        <param name="wheelbase"          value="$(arg wheelbase)"          />
+        <param name="v_max"              value="$(arg v_max)"              />
+        <param name="gamma_max"          value="$(arg gamma_max)"          />
+        <param name="k_rho"              value="$(arg k_rho)"              />
+        <param name="k_alpha"            value="$(arg k_alpha)"            />
+        <param name="k_beta"             value="$(arg k_beta)"             />
+        <param name="position_threshold" value="$(arg position_threshold)" />
+        <param name="angle_threshold"    value="$(arg angle_threshold)"    />
+        <param name="control_rate"       value="$(arg control_rate)"       />
+    </node>
+
+    <!-- ── Noeud Évitement d'obstacles (LiDAR) ───────────────────── -->
+    <node name="obstacle_avoidance" pkg="limo_autonomous"
+          type="obstacle_avoidance_node.py" output="screen">
+        <param name="stop_distance"  value="$(arg stop_distance)"  />
+        <param name="slow_distance"  value="$(arg slow_distance)"  />
+        <param name="fov_center_deg" value="$(arg fov_center_deg)" />
+        <param name="control_rate"   value="$(arg control_rate)"   />
+    </node>
+
+    <!-- ── Noeud helper RViz (trajectoire + goal marker) ─────────── -->
+    <node name="rviz_helper" pkg="limo_autonomous"
+          type="rviz_helper_node.py" output="screen" />
+
+    <!-- ── RViz ──────────────────────────────────────────────────── -->
+    <group if="$(arg use_rviz)">
+        <node name="rviz" pkg="rviz" type="rviz" output="screen"
+              args="-d $(find limo_autonomous)/rviz/limo_full.rviz" />
+    </group>
+
+    <!-- ── rqt_plot ───────────────────────────────────────────────── -->
+    <group if="$(arg use_rqt)">
+        <include file="$(find limo_autonomous)/launch/rqt_plot.launch" />
+    </group>
+</launch>

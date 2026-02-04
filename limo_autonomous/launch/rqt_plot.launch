@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+  rqt_plot – Courbes en temps réel
+  Fenêtre 1 : Position (x, y) et orientation (theta)
+  Fenêtre 2 : Vitesse linéaire + angulaire  +  distance à la cible
+  Fenêtre 3 : Distances obstacles (gauche / centre / droite)
+
+  Usage :
+    roslaunch limo_autonomous rqt_plot.launch
+-->
+<launch>
+    <!-- ── Fenêtre 1 : Position & Orientation ─────────────────────── -->
+    <node name="rqt_plot_position" pkg="rqt_plot" type="rqt_plot" output="screen"
+          args="/odom/pose/pose/position/x:m /odom/pose/pose/position/y:m" />
+
+    <!-- ── Fenêtre 2 : Vitesse + Distance à la cible ────────────── -->
+    <node name="rqt_plot_vitesse" pkg="rqt_plot" type="rqt_plot" output="screen"
+          args="/cmd_vel/linear/x:m/s /cmd_vel/angular/z:rad/s /controller/distance:m" />
+
+    <!-- ── Fenêtre 3 : Distances obstacles LiDAR ─────────────────── -->
+    <node name="rqt_plot_obstacles" pkg="rqt_plot" type="rqt_plot" output="screen"
+          args="/obstacle/min_dist_left:m /obstacle/min_dist_center:m /obstacle/min_dist_right:m" />
+</launch>

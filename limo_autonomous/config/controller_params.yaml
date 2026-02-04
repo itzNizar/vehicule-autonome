@@ -1,0 +1,54 @@
+# Configuration du controleur pour le robot Limo
+# Compatible ROS Melodic
+# Bureau d'etude ENSEM - Fevrier 2026
+
+# =============================================================================
+# PARAMETRES DU ROBOT
+# =============================================================================
+robot:
+  wheelbase: 0.2          # Empattement L (m)
+  v_max: 0.5              # Vitesse maximale (m/s)
+  gamma_max: 0.46         # Angle de braquage max (rad) = 26.6 deg
+  
+# =============================================================================
+# GAINS DU CONTROLEUR
+# =============================================================================
+# Conditions de stabilite:
+#   - k_rho > 0
+#   - k_alpha > k_rho
+#   - k_beta < 0
+#
+controller:
+  k_rho: 1.0              # Gain sur la distance
+  k_alpha: 3.0            # Gain sur l'angle vers la cible
+  k_beta: -0.5            # Gain sur l'orientation finale
+  
+# =============================================================================
+# SEUILS DE CONVERGENCE
+# =============================================================================
+thresholds:
+  position: 0.05          # Seuil de position (m) - 5 cm
+  angle: 0.1              # Seuil d'orientation (rad) = 5.7 deg
+  
+# =============================================================================
+# PARAMETRES DE CONTROLE
+# =============================================================================
+control:
+  rate: 20                # Frequence de controle (Hz)
+
+# =============================================================================
+# PROFILS PRE-DEFINIS
+# =============================================================================
+# Profil "prudent" - pour environnements encombres
+profile_cautious:
+  k_rho: 0.5
+  k_alpha: 2.0
+  k_beta: -0.3
+  v_max: 0.3
+
+# Profil "rapide" - pour environnements degages  
+profile_fast:
+  k_rho: 1.5
+  k_alpha: 4.0
+  k_beta: -0.8
+  v_max: 0.8

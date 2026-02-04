@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+  Interface de supervision Tkinter + RViz + rqt_plot
+  Nécessite un écran (X11)
+-->
+<launch>
+    <node name="supervisor_gui"  pkg="limo_autonomous" type="supervisor_gui.py"  output="screen" />
+    <node name="rviz_helper"     pkg="limo_autonomous" type="rviz_helper_node.py" output="screen" />
+
+    <node name="rviz" pkg="rviz" type="rviz" output="screen"
+          args="-d $(find limo_autonomous)/rviz/limo_full.rviz" />
+
+    <include file="$(find limo_autonomous)/launch/rqt_plot.launch" />
+</launch>

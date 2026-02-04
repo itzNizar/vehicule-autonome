@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!--
+  Contrôleur + évitement obstacles – driver déjà lancé séparément.
+  Usage :
+    1. roslaunch limo_base limo_base.launch
+    2. roslaunch limo_autonomous controller_only.launch
+-->
+<launch>
+    <arg name="k_rho"    default="1.0"  />
+    <arg name="k_alpha"  default="3.0"  />
+    <arg name="k_beta"   default="-0.5" />
+    <arg name="v_max"    default="0.5"  />
+
+    <arg name="stop_distance"  default="0.3" />
+    <arg name="slow_distance"  default="0.6" />
+
+    <!-- Contrôleur -->
+    <node name="limo_controller" pkg="limo_autonomous"
+          type="controller_node.py" output="screen">
+        <param name="wheelbase"          value="0.2"              />
+        <param name="v_max"              value="$(arg v_max)"     />
+        <param name="gamma_max"          value="0.46"             />
+        <param name="k_rho"              value="$(arg k_rho)"     />
+        <param name="k_alpha"            value="$(arg k_alpha)"   />
+        <param name="k_beta"             value="$(arg k_beta)"    />
+        <param name="position_threshold" value="0.05"             />
+        <param name="angle_threshold"    value="0.1"              />
+        <param name="control_rate"       value="20"               />
+    </node>
+
+    <!-- Évitement obstacles -->
+    <node name="obstacle_avoidance" pkg="limo_autonomous"
+          type="obstacle_avoidance_node.py" output="screen">
+        <param name="stop_distance"  value="$(arg stop_distance)"  />
+        <param name="slow_distance"  value="$(arg slow_distance)"  />
+        <param name="fov_center_deg" value="30"                    />
+        <param name="control_rate"   value="20"                    />
+    </node>
+</launch>
